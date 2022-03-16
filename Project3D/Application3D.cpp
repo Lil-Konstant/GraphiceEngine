@@ -30,6 +30,19 @@ bool Application3D::startup() {
 										  getWindowWidth() / (float)getWindowHeight(),
 										  0.1f, 1000.f);
 
+	// Load the vertex and fragment shaders into the shader program
+	m_shaderProgram.loadShader(aie::eShaderStage::VERTEX, "./shaders/simple.vert");
+	m_shaderProgram.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/simple.frag");
+	
+	// Attempt to link the shaders into a program, return if failed
+	if (m_shaderProgram.link() == false)
+	{
+		printf("Shader Error: %s\n", m_shaderProgram.getLastError());
+		return false;
+	}
+
+	createUnitCube();
+
 	return true;
 }
 
@@ -44,7 +57,7 @@ void Application3D::update(float deltaTime) {
 	float time = getTime();
 
 	// rotate camera
-	m_viewMatrix = glm::lookAt(vec3(glm::sin(time) * 10, 10, glm::cos(time) * 10),
+	m_viewMatrix = glm::lookAt(vec3(glm::sin(time) * 10, glm::sin(time) * 10, glm::cos(time) * 10),
 							   vec3(0), vec3(0, 1, 0));
 
 	// wipe the gizmos clean for this frame
@@ -63,10 +76,10 @@ void Application3D::update(float deltaTime) {
 	}
 
 	// add a transform so that we can see the axis
-	Gizmos::addTransform(mat4(1));
+	//Gizmos::addTransform(mat4(1));
 
 	// demonstrate a few shapes
-	Gizmos::addAABBFilled(vec3(0), vec3(1), vec4(0, 0.5f, 1, 0.25f));
+	/*Gizmos::addAABBFilled(vec3(0), vec3(1), vec4(0, 0.5f, 1, 0.25f));
 	Gizmos::addSphere(vec3(5, 0, 5), 1, 8, 8, vec4(1, 0, 0, 0.5f));
 	Gizmos::addRing(vec3(5, 0, -5), 1, 1.5f, 8, vec4(0, 1, 0, 1));
 	Gizmos::addDisk(vec3(-5, 0, 5), 1, 16, vec4(1, 1, 0, 1));
@@ -74,12 +87,12 @@ void Application3D::update(float deltaTime) {
 
 	mat4 t = glm::rotate(mat4(1), time, glm::normalize(vec3(1, 1, 1)));
 	t[3] = vec4(-2, 0, 0, 1);
-	Gizmos::addCylinderFilled(vec3(0), 0.5f, 1, 5, vec4(0, 1, 1, 1), &t);
+	Gizmos::addCylinderFilled(vec3(0), 0.5f, 1, 5, vec4(0, 1, 1, 1), &t);*/
 
-	// demonstrate 2D gizmos
-	Gizmos::add2DAABB(glm::vec2(getWindowWidth() / 2, 100),
-					  glm::vec2(getWindowWidth() / 2 * (fmod(getTime(), 3.f) / 3), 20),
-					  vec4(0, 1, 1, 1));
+	//// demonstrate 2D gizmos
+	//Gizmos::add2DAABB(glm::vec2(getWindowWidth() / 2, 100),
+	//				  glm::vec2(getWindowWidth() / 2 * (fmod(getTime(), 3.f) / 3), 20),
+	//				  vec4(0, 1, 1, 1));
 
 	// quit if we press escape
 	aie::Input* input = aie::Input::getInstance();
@@ -98,9 +111,42 @@ void Application3D::draw() {
 										  getWindowWidth() / (float)getWindowHeight(),
 										  0.1f, 1000.f);
 
+	// Bind the shader program for use
+	m_shaderProgram.bind();
+
+	// Bind the ProjectionViewModel uniform and time for the quad
+	auto pvm = m_projectionMatrix * m_viewMatrix * m_unitCubeTransform;
+	m_shaderProgram.bindUniform("ProjectionViewModel", pvm);
+	m_shaderProgram.bindUniform("Time", getTime());
+
+	// Draw the quad
+	m_unitCube.draw();
+
 	// draw 3D gizmos
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
+}
 
-	// draw 2D gizmos using an orthogonal projection matrix (or screen dimensions)
-	Gizmos::draw2D((float)getWindowWidth(), (float)getWindowHeight());
+void Application3D::createUnitCube()
+{
+	Mesh::Vertex vertices[8];
+	vertices[0].position = { -0.5f, -0.5f, 0.5f, 1 };
+	vertices[1].position = { 0.5f, -0.5f, 0.5f, 1 };
+	vertices[2].position = { -0.5f, -0.5f, -0.5f, 1 };
+	vertices[3].position = { 0.5f, -0.5f, -0.5f, 1 };
+	vertices[4].position = { -0.5f, 0.5f, 0.5f, 1 };
+	vertices[5].position = { 0.5f, 0.5f, 0.5f, 1 };
+	vertices[6].position = { -0.5f, 0.5f, -0.5f, 1 };
+	vertices[7].position = { 0.5f, 0.5f, -0.5f, 1 };
+
+	unsigned int indices[36] = { 2, 1, 0, 3, 1, 2, 4, 5, 6, 5, 7, 6, 2, 6, 3, 6, 7, 3, 4, 6, 0, 6, 2, 0, 5, 4, 0, 5, 0, 1, 7, 5, 1, 1, 3, 7 };
+
+	// Initialise a test quad with custom vertices
+	m_unitCube.initialise(8, vertices, 36, indices);
+
+	// Make the quad 1 units wide
+	m_unitCubeTransform = {
+		5, 0, 0, 0,
+		0, 5, 0, 0,
+		0, 0, 5, 0,
+		0, 0, 0, 1 };
 }

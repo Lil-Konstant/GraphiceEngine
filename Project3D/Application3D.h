@@ -2,6 +2,8 @@
 
 #include "Application.h"
 #include <glm/mat4x4.hpp>
+#include "Shader.h"
+#include "Mesh.h"
 
 class Application3D : public aie::Application {
 public:
@@ -15,8 +17,15 @@ public:
 	virtual void update(float deltaTime);
 	virtual void draw();
 
+	void createUnitCube();
+
 protected:
 
 	glm::mat4	m_viewMatrix;
 	glm::mat4	m_projectionMatrix;
+
+	aie::ShaderProgram m_shaderProgram;
+	
+	Mesh m_unitCube;
+	glm::mat4 m_unitCubeTransform;
 };
