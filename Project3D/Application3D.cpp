@@ -41,6 +41,18 @@ bool Application3D::startup() {
 		return false;
 	}
 
+	if (m_bunnyMesh.load("./stanford/bunny.obj") == false)
+	{
+		printf("Bunny Mesh Error!\n");
+		return false;
+	}
+
+	m_bunnyTransform = {
+		0.5f, 0, 0, 0,
+		0, 0.5f, 0, 0,
+		0, 0, 0.5f, 0,
+		0, 0, 0, 1 };
+
 	createUnitCube();
 
 	return true;
@@ -119,8 +131,15 @@ void Application3D::draw() {
 	m_shaderProgram.bindUniform("ProjectionViewModel", pvm);
 	m_shaderProgram.bindUniform("Time", getTime());
 
-	// Draw the quad
-	m_unitCube.draw();
+	// Draw the cube
+	//m_unitCube.draw();
+
+	// Bind the ProjectionViewModel uniform and time for the quad
+	pvm = m_projectionMatrix * m_viewMatrix * m_bunnyTransform;
+	m_shaderProgram.bindUniform("ProjectionViewModel", pvm);
+	m_shaderProgram.bindUniform("Time", getTime());
+
+	m_bunnyMesh.draw();
 
 	// draw 3D gizmos
 	Gizmos::draw(m_projectionMatrix * m_viewMatrix);

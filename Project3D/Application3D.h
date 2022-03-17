@@ -4,6 +4,7 @@
 #include <glm/mat4x4.hpp>
 #include "Shader.h"
 #include "Mesh.h"
+#include "OBJMesh.h"
 
 class Application3D : public aie::Application {
 public:
@@ -26,6 +27,11 @@ protected:
 
 	aie::ShaderProgram m_shaderProgram;
 	
+	// Custom mesh class
 	Mesh m_unitCube;
 	glm::mat4 m_unitCubeTransform;
+
+	// Provided OBJ mesh class
+	aie::OBJMesh m_bunnyMesh;
+	glm::mat4 m_bunnyTransform;
 };
