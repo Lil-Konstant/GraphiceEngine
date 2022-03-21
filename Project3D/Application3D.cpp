@@ -21,6 +21,9 @@ bool Application3D::startup() {
 	
 	setBackgroundColour(0.25f, 0.25f, 0.25f);
 
+	m_light.colour = { 1.0f, 1.0f, 1.0f };
+	m_ambientLight = { 0.5f, 0.5f, 0.5f };
+
 	// initialise gizmo primitive counts
 	Gizmos::create(10000, 10000, 10000, 10000);
 
@@ -31,8 +34,8 @@ bool Application3D::startup() {
 										  0.1f, 1000.f);
 
 	// Load the vertex and fragment shaders into the shader program
-	m_shaderProgram.loadShader(aie::eShaderStage::VERTEX, "./shaders/simple.vert");
-	m_shaderProgram.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/simple.frag");
+	m_shaderProgram.loadShader(aie::eShaderStage::VERTEX, "./shaders/phong.vert");
+	m_shaderProgram.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phong.frag");
 	
 	// Attempt to link the shaders into a program, return if failed
 	if (m_shaderProgram.link() == false)
@@ -41,7 +44,7 @@ bool Application3D::startup() {
 		return false;
 	}
 
-	if (m_bunnyMesh.load("./stanford/bunny.obj") == false)
+	if (m_bunnyMesh.load("./stanford/buddha.obj") == false)
 	{
 		printf("Bunny Mesh Error!\n");
 		return false;
@@ -68,9 +71,12 @@ void Application3D::update(float deltaTime) {
 	// query time since application started
 	float time = getTime();
 
+	// rotate the light around the z axis
+	m_light.direction = glm::normalize(vec3(glm::cos(time * 2), glm::sin(time * 2), 0));
+
 	// rotate camera
-	m_viewMatrix = glm::lookAt(vec3(glm::sin(time) * 10, glm::sin(time) * 10, glm::cos(time) * 10),
-							   vec3(0), vec3(0, 1, 0));
+	/*m_viewMatrix = glm::lookAt(vec3(glm::sin(time) * 10, glm::sin(time) * 10, glm::cos(time) * 10),
+							   vec3(0), vec3(0, 1, 0));*/
 
 	// wipe the gizmos clean for this frame
 	Gizmos::clear();
@@ -126,18 +132,16 @@ void Application3D::draw() {
 	// Bind the shader program for use
 	m_shaderProgram.bind();
 
-	// Bind the ProjectionViewModel uniform and time for the quad
-	auto pvm = m_projectionMatrix * m_viewMatrix * m_unitCubeTransform;
-	m_shaderProgram.bindUniform("ProjectionViewModel", pvm);
-	m_shaderProgram.bindUniform("Time", getTime());
-
-	// Draw the cube
-	//m_unitCube.draw();
-
-	// Bind the ProjectionViewModel uniform and time for the quad
-	pvm = m_projectionMatrix * m_viewMatrix * m_bunnyTransform;
-	m_shaderProgram.bindUniform("ProjectionViewModel", pvm);
-	m_shaderProgram.bindUniform("Time", getTime());
+	// Bind the ProjectionView and Model uniforms for the bunny
+	auto pv = m_projectionMatrix * m_viewMatrix;
+	m_shaderProgram.bindUniform("ProjectionViewTransform", pv);
+	m_shaderProgram.bindUniform("ModelTransform", m_bunnyTransform);
+	// Bind the light uniforms
+	m_shaderProgram.bindUniform("AmbientColour", m_ambientLight);
+	m_shaderProgram.bindUniform("LightColour", m_light.colour);
+	m_shaderProgram.bindUniform("LightDirection", m_light.direction);
+	// Bind the camera uniform
+	m_shaderProgram.bindUniform("CameraPosition", glm::inverse(m_viewMatrix)[3]);
 
 	m_bunnyMesh.draw();
 

@@ -34,4 +34,13 @@ protected:
 	// Provided OBJ mesh class
 	aie::OBJMesh m_bunnyMesh;
 	glm::mat4 m_bunnyTransform;
+
+	struct Light
+	{
+		glm::vec3 direction;
+		glm::vec3 colour;
+	};
+
+	Light m_light;
+	glm::vec3 m_ambientLight;
 };
