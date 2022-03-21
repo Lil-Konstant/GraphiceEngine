@@ -17,8 +17,6 @@ uniform float specularPower;
 // Camera Transform
 uniform vec3 CameraPosition;
 
-out vec4 FragColour;
-
 void main()
 {
 	vec3 surfaceNormal = normalize(vNormal);
@@ -28,7 +26,7 @@ void main()
 	float lambertTerm = max(0, min(1, dot(surfaceNormal, -lightDirection)));
 
 	vec3 viewingDisplacement = normalize(CameraPosition - vWorldPosition);
-	vec3 reflectedLight = reflect(-lightDirection, surfaceNormal);
+	vec3 reflectedLight = reflect(lightDirection, surfaceNormal);
 
 	float specularTerm = pow(max(0, dot(reflectedLight, viewingDisplacement)), specularPower);
 
@@ -41,5 +39,5 @@ void main()
 	//specular = vec3(0.0f, 0.0f, 0.0f);
 
 	// output lambert as greyscale
-	FragColour = vec4(ambient + diffuse + specular, 1);
+	gl_FragColor = vec4(ambient + diffuse + specular, 1);
 }

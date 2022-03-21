@@ -3,6 +3,8 @@
 #include "Input.h"
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#include <iostream>
+#include "imgui.h"
 
 using glm::vec3;
 using glm::vec4;
@@ -51,12 +53,10 @@ bool Application3D::startup() {
 	}
 
 	m_bunnyTransform = {
-		0.5f, 0, 0, 0,
-		0, 0.5f, 0, 0,
-		0, 0, 0.5f, 0,
+		0.3f, 0, 0, 0,
+		0, 0.3f, 0, 0,
+		0, 0, 0.3f, 0,
 		0, 0, 0, 1 };
-
-	createUnitCube();
 
 	return true;
 }
@@ -72,11 +72,11 @@ void Application3D::update(float deltaTime) {
 	float time = getTime();
 
 	// rotate the light around the z axis
-	m_light.direction = glm::normalize(vec3(glm::cos(time * 2), glm::sin(time * 2), 0));
+	m_light.direction = glm::normalize(vec3(glm::cos(time * 0.5f), glm::sin(time * 0.5f), 0));
 
-	// rotate camera
-	/*m_viewMatrix = glm::lookAt(vec3(glm::sin(time) * 10, glm::sin(time) * 10, glm::cos(time) * 10),
-							   vec3(0), vec3(0, 1, 0));*/
+	// rotate the camera on swivel
+	m_viewMatrix = glm::lookAt(vec3(glm::sin(time) * 5, 5, glm::cos(time) * 10),
+		vec3(0), vec3(0, 1, 0));
 
 	// wipe the gizmos clean for this frame
 	Gizmos::clear();
@@ -92,6 +92,11 @@ void Application3D::update(float deltaTime) {
 						vec3(-10, 0, -10 + i),
 						i == 10 ? white : black);
 	}
+
+	ImGui::Begin("Light Settings");
+	ImGui::DragFloat3("Sunlight Direction", &m_light.direction[0], 0.1f, -1.0f, 1.0f);
+	ImGui::DragFloat3("Sunlight Colour", &m_light.colour[0], 0.1f, 0.0f, 2.0f);
+	ImGui::End();
 
 	// add a transform so that we can see the axis
 	//Gizmos::addTransform(mat4(1));
@@ -141,7 +146,8 @@ void Application3D::draw() {
 	m_shaderProgram.bindUniform("LightColour", m_light.colour);
 	m_shaderProgram.bindUniform("LightDirection", m_light.direction);
 	// Bind the camera uniform
-	m_shaderProgram.bindUniform("CameraPosition", glm::inverse(m_viewMatrix)[3]);
+	m_shaderProgram.bindUniform("CameraPosition", vec3(glm::inverse(m_viewMatrix)[3]));
+
 
 	m_bunnyMesh.draw();
 
