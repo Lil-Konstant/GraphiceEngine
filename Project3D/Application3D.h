@@ -2,6 +2,7 @@
 
 #include "Application.h"
 #include <glm/mat4x4.hpp>
+#include "Camera.h"
 #include "Shader.h"
 #include "Mesh.h"
 #include "OBJMesh.h"
@@ -22,8 +23,7 @@ public:
 
 protected:
 
-	glm::mat4	m_viewMatrix;
-	glm::mat4	m_projectionMatrix;
+	Camera m_mainCamera;
 
 	aie::ShaderProgram m_shaderProgram;
 	
@@ -43,4 +43,8 @@ protected:
 
 	Light m_light;
 	glm::vec3 m_ambientLight;
+
+	aie::Texture m_gridTexture;
+	Mesh m_quad;
+	mat4 m_quadTransform;
 };

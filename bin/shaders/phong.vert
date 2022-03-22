@@ -2,9 +2,11 @@
 
 layout ( location = 0 ) in vec4 Position;
 layout ( location = 1 ) in vec4 Normal;
+layout ( location = 2 ) in vec2 TexCoord;
 
 out vec3 vWorldPosition;
 out vec3 vNormal;
+out vec2 vTexCoord;
 
 uniform mat4 ProjectionViewTransform;
 uniform mat4 ModelTransform; // used to transform the normal from model to world space
@@ -15,6 +17,8 @@ void main()
 	vWorldPosition = (ModelTransform * Position).xyz;
 	// get the vertex's normal in world space for lighting in frag shader
 	vNormal = (ModelTransform * Normal).xyz;
+	// simply pass the texture coordinate to the frag stage for interpolation without modifying it
+	vTexCoord = TexCoord;
 	// get the vertex's position in screen space for pixel shading
 	gl_Position = ProjectionViewTransform * ModelTransform * Position;
 }

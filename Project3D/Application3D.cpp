@@ -29,16 +29,13 @@ bool Application3D::startup() {
 	// initialise gizmo primitive counts
 	Gizmos::create(10000, 10000, 10000, 10000);
 
-	// create simple camera transforms
-	m_viewMatrix = glm::lookAt(vec3(10), vec3(0), vec3(0, 1, 0));
-	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f,
-										  getWindowWidth() / (float)getWindowHeight(),
-										  0.1f, 1000.f);
+	// initialise the main camera
+	m_mainCamera = Camera(-90.0f, -40.0f, { 0, 10, 10 });
 
 	// Load the vertex and fragment shaders into the shader program
 	m_shaderProgram.loadShader(aie::eShaderStage::VERTEX, "./shaders/phong.vert");
 	m_shaderProgram.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phong.frag");
-	
+
 	// Attempt to link the shaders into a program, return if failed
 	if (m_shaderProgram.link() == false)
 	{
@@ -46,17 +43,31 @@ bool Application3D::startup() {
 		return false;
 	}
 
-	if (m_bunnyMesh.load("./stanford/buddha.obj") == false)
+	if (m_bunnyMesh.load("./soulspear/soulspear.obj", true, true) == false)
 	{
 		printf("Bunny Mesh Error!\n");
 		return false;
 	}
 
+	if (m_gridTexture.load("./textures/numbered_grid.tga") == false)
+	{
+		printf("Couldn't load grid texture!\n");
+		return false;
+	}
+
 	m_bunnyTransform = {
-		0.3f, 0, 0, 0,
-		0, 0.3f, 0, 0,
-		0, 0, 0.3f, 0,
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
 		0, 0, 0, 1 };
+
+	m_quadTransform = {
+		10, 0, 0, 0,
+		0, 10, 0, 0,
+		0, 0, 10, 0,
+		0, 0, 0, 1 };
+
+	m_quad.initialiseQuad();
 
 	return true;
 }
@@ -71,12 +82,11 @@ void Application3D::update(float deltaTime) {
 	// query time since application started
 	float time = getTime();
 
-	// rotate the light around the z axis
-	m_light.direction = glm::normalize(vec3(glm::cos(time * 0.5f), glm::sin(time * 0.5f), 0));
+	// check for user input to update the main camera with
+	m_mainCamera.update(deltaTime);
 
-	// rotate the camera on swivel
-	m_viewMatrix = glm::lookAt(vec3(glm::sin(time) * 5, 5, glm::cos(time) * 10),
-		vec3(0), vec3(0, 1, 0));
+	// rotate the light around the z axis
+	m_light.direction = glm::normalize(vec3(glm::cos(time), 0, glm::sin(time)));
 
 	// wipe the gizmos clean for this frame
 	Gizmos::clear();
@@ -129,30 +139,33 @@ void Application3D::draw() {
 	// wipe the screen to the background colour
 	clearScreen();
 
-	// update perspective in case window resized
-	m_projectionMatrix = glm::perspective(glm::pi<float>() * 0.25f,
-										  getWindowWidth() / (float)getWindowHeight(),
-										  0.1f, 1000.f);
-
 	// Bind the shader program for use
 	m_shaderProgram.bind();
 
-	// Bind the ProjectionView and Model uniforms for the bunny
-	auto pv = m_projectionMatrix * m_viewMatrix;
+	// Bind the ProjectionView transform
+	auto pv = m_mainCamera.getProjectionMatrix(getWindowWidth(), getWindowHeight()) * m_mainCamera.getViewMatrix();
 	m_shaderProgram.bindUniform("ProjectionViewTransform", pv);
-	m_shaderProgram.bindUniform("ModelTransform", m_bunnyTransform);
 	// Bind the light uniforms
 	m_shaderProgram.bindUniform("AmbientColour", m_ambientLight);
 	m_shaderProgram.bindUniform("LightColour", m_light.colour);
 	m_shaderProgram.bindUniform("LightDirection", m_light.direction);
 	// Bind the camera uniform
-	m_shaderProgram.bindUniform("CameraPosition", vec3(glm::inverse(m_viewMatrix)[3]));
+	m_shaderProgram.bindUniform("CameraPosition", m_mainCamera.getPosition());
 
-
+	m_shaderProgram.bindUniform("ModelTransform", m_bunnyTransform);
 	m_bunnyMesh.draw();
+	
+	m_shaderProgram.bindUniform("Ka", vec3(1, 1, 1));
+	m_shaderProgram.bindUniform("Kd", vec3(1, 1, 1));
+	m_shaderProgram.bindUniform("Ks", vec3(1, 1, 1));
+	m_shaderProgram.bindUniform("ModelTransform", m_quadTransform);
+	// bind the quad texture for quad drawing
+	m_shaderProgram.bindUniform("diffuseTexture", 0);
+	m_gridTexture.bind(0);
+	m_quad.draw();
 
 	// draw 3D gizmos
-	Gizmos::draw(m_projectionMatrix * m_viewMatrix);
+	Gizmos::draw(pv);
 }
 
 void Application3D::createUnitCube()

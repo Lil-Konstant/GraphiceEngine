@@ -24,9 +24,17 @@ void Mesh::initialise(unsigned int vertexCount, const Vertex* vertices, unsigned
 	// Fill the buffer with the vertices array
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * vertexCount, vertices, GL_STATIC_DRAW);
 
-	// Enable the first element as position to tell the vao how to arrange the vertex data
+	// Enable the first element as position
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+
+	// Enable the second element as normal
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)sizeof(glm::vec4));
+
+	// Enable the third element as textCoord
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(glm::vec4) * 2));
 
 	// If an index buffer was sent, then we need to generate the IBO and bind it
 	if (indexCount > 0)
@@ -65,24 +73,44 @@ void Mesh::initialiseQuad()
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
-	// Define 6 vertices and for 2 triangles (not using ibo)
+	// Define 6 vertices and for 2 triangles (not using ibo), and set their corresponding UV coordinates
 	Vertex vertices[6];
-	vertices[0].position = { -0.5f, 0, 0.5f, 1 };
-	vertices[1].position = { 0.5f, 0, 0.5f, 1 };
-	vertices[2].position = { -0.5f, 0, -0.5f, 1 };
+	vertices[0].position = { -0.5f, 0, 0.5f, 1 }; // bottom left 
+	vertices[0].texCoord = { 0, 1 }; 
+	vertices[0].normal = { 0, 1, 0, 0 }; 
+	vertices[1].position = { 0.5f, 0, 0.5f, 1 }; // bottom right 
+	vertices[1].texCoord = { 1, 1 }; 
+	vertices[1].normal = { 0, 1, 0, 0 };
+	vertices[2].position = { -0.5f, 0, -0.5f, 1 }; // top left 
+	vertices[2].texCoord = { 0, 0 }; 
+	vertices[2].normal = { 0, 1, 0, 0 };
 
-	vertices[3].position = { -0.5f, 0, -0.5f, 1 };
-	vertices[4].position = { 0.5f, 0, 0.5f, 1 };
-	vertices[5].position = { 0.5f, 0, -0.5f, 1 };
+	vertices[3].position = { -0.5f, 0, -0.5f, 1 }; // top left
+	vertices[3].texCoord = { 0, 0 };
+	vertices[3].normal = { 0, 1, 0, 0 };
+	vertices[4].position = { 0.5f, 0, 0.5f, 1 }; // bottom right 
+	vertices[4].texCoord = { 1, 1 };
+	vertices[4].normal = { 0, 1, 0, 0 };
+	vertices[5].position = { 0.5f, 0, -0.5f, 1 }; // top right 
+	vertices[5].texCoord = { 1, 0 }; 
+	vertices[5].normal = { 0, 1, 0, 0 };
 
 	triCount = 2;
 
 	// Fill the vbo with the vertices data
 	glBufferData(GL_ARRAY_BUFFER, sizeof(Vertex) * 6, vertices, GL_STATIC_DRAW);
 
-	// Enable the first element as position to tell the vao how to arrange the vertex data
+	// Enable the first element as position
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
+
+	// Enable the second element as normal
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_TRUE, sizeof(Vertex), (void*)sizeof(glm::vec4));
+
+	// Enable the third element as textCoord
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)(sizeof(glm::vec4) * 2));
 
 	// Unbind the buffers as we are done assigning to them
 	glBindVertexArray(0);

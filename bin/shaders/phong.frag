@@ -2,6 +2,7 @@
 
 in vec3 vWorldPosition;
 in vec3 vNormal;
+in vec2 vTexCoord;
 
 // Directional and ambient light properties
 uniform vec3 AmbientColour;
@@ -13,6 +14,9 @@ uniform vec3 Ka;
 uniform vec3 Kd;
 uniform vec3 Ks;
 uniform float specularPower;
+
+// Texture properties
+uniform sampler2D diffuseTexture;
 
 // Camera Transform
 uniform vec3 CameraPosition;
@@ -37,7 +41,11 @@ void main()
 	//ambient = vec3(0.0f, 0.0f, 0.0f);
 	//diffuse = vec3(0.0f, 0.0f, 0.0f);
 	//specular = vec3(0.0f, 0.0f, 0.0f);
-
-	// output lambert as greyscale
-	gl_FragColor = vec4(ambient + diffuse + specular, 1);
+	
+	// combine the each lighting type for the final fragment colour
+	gl_FragColor = texture(diffuseTexture, vTexCoord) * vec4(ambient + diffuse + specular, 1);
+	if (gl_FragColor == vec4(0, 0, 0, 1))
+	{
+		gl_FragColor = vec4(ambient + diffuse + specular, 1);
+	}
 }
