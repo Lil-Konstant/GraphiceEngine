@@ -1,15 +1,17 @@
 #pragma once
-
 #include "Application.h"
-#include <glm/mat4x4.hpp>
 #include "Camera.h"
+#include "Light.h"
 #include "Shader.h"
 #include "Mesh.h"
 #include "OBJMesh.h"
+#include "ObjectInstance.h"
+
+using namespace glm;
+using namespace aie;
 
 class Application3D : public aie::Application {
 public:
-
 	Application3D();
 	virtual ~Application3D();
 
@@ -23,28 +25,15 @@ public:
 
 protected:
 
-	Camera m_mainCamera;
-
-	aie::ShaderProgram m_shaderProgram;
-	
-	// Custom mesh class
-	Mesh m_unitCube;
-	glm::mat4 m_unitCubeTransform;
-
-	// Provided OBJ mesh class
-	aie::OBJMesh m_bunnyMesh;
-	glm::mat4 m_bunnyTransform;
-
-	struct Light
-	{
-		glm::vec3 direction;
-		glm::vec3 colour;
-	};
-
+	Scene* m_mainScene;
+	ShaderProgram m_shaderProgram;
 	Light m_light;
-	glm::vec3 m_ambientLight;
+	vec3 m_ambientLight;
 
-	aie::Texture m_gridTexture;
+	OBJMesh m_spearMesh;
+	ObjectInstance* m_spearInstance;
+
+	Texture m_gridTexture;
 	Mesh m_quad;
 	mat4 m_quadTransform;
 };
