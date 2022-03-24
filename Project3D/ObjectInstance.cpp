@@ -19,8 +19,12 @@ void ObjectInstance::draw(Scene* scene)
 
 	// Bind the light uniforms
 	m_shaderProgram->bindUniform("AmbientColour", scene->getAmbientLight());
-	m_shaderProgram->bindUniform("LightColour", scene->getLight()->colour);
-	m_shaderProgram->bindUniform("LightDirection", scene->getLight()->direction);
+	m_shaderProgram->bindUniform("LightColour", scene->getSunlight()->colour);
+	m_shaderProgram->bindUniform("LightDirection", scene->getSunlight()->direction);
+	int numLights = scene->getNumLights();
+	m_shaderProgram->bindUniform("numLights", numLights);
+	m_shaderProgram->bindUniform("PointLightColours", numLights, scene->getPointLightColours());
+	m_shaderProgram->bindUniform("PointLightPositions", numLights, scene->getPointLightPositions());
 	
 	// Draw the mesh of this ObjectInstance now the uniforms have been set correctly
 	m_mesh->draw();

@@ -11,6 +11,10 @@ in vec3 vBiTangent;
 uniform vec3 AmbientColour;
 uniform vec3 LightColour;
 uniform vec3 LightDirection;
+const int MAX_LIGHTS = 4;
+uniform int numLights;
+uniform vec3 PointLightColours[MAX_LIGHTS];
+uniform vec3 PointLightPositions[MAX_LIGHTS];
 
 // Material light properties
 uniform vec3 Ka;
@@ -25,6 +29,17 @@ uniform sampler2D normalTexture;
 
 // Camera Transform
 uniform vec3 CameraPosition;
+
+vec3 diffuse(vec3 lightDirection, vec3 lightColour, vec3 normal)
+{
+	return lightColour * max(0, min(1, dot(normal, -lightDirection)));
+}
+
+vec3 specular(vec3 lightDirection, vec3 lightColour, vec3 normal, vec3 viewingDisplacement)
+{
+	vec3 reflectedLight = reflect(lightDirection, normal);
+	return lightColour * pow(max(0, dot(reflectedLight, viewingDisplacement)), specularPower);
+}
 
 void main()
 {
@@ -41,13 +56,28 @@ void main()
 	// Modify the lighting normal based on the high res normal transformed into worldspace
 	normal = TBN * normalTex;
 
-	// clamp the light calculation between 0 and 1
-	float lambertTerm = max(0, min(1, dot(normal, -lightDirection)));
-
+	// Calculate the diffuse total for all 4 affecting lights
+	vec3 diffuseTotal = diffuse(lightDirection, LightColour, normal);
+	// Calculate the sepcular total for all 4 affecting lights
 	vec3 viewingDisplacement = normalize(CameraPosition - vWorldPosition);
-	vec3 reflectedLight = reflect(lightDirection, normal);
+	vec3 specularTotal = specular(lightDirection, LightColour, normal, viewingDisplacement);
+	
+	// Iterate through all the point lights, and acculate their diffuse and specular lighting contributions
+	for (int i = 0; i < numLights && i < MAX_LIGHTS; i++)
+	{
+		// Store the direction and distance of this point light
+		vec3 direction = vWorldPosition - PointLightPositions[i];
+		float distance = length(direction);
+		// Normalise the direction now that we have the distance
+		direction /= distance;
 
-	float specularTerm = pow(max(0, dot(reflectedLight, viewingDisplacement)), specularPower);
+		// Attenuate the light intensity of this point light with the inverse square law
+		vec3 colour = PointLightColours[i]/(distance * distance);
+
+		// Add this point lights diffuse and specular contribution
+		diffuseTotal += diffuse(direction, colour, normal);
+		specularTotal += specular(direction, colour, normal, viewingDisplacement);
+	}
 
 	// Sample the diffuse and specular texture maps using the interpolated UV coord for this fragment
 	vec3 diffuseTexColour = texture(diffuseTexture, vTexCoord).rgb;
@@ -55,8 +85,8 @@ void main()
 
 	// Calculate the three sections of phong lighting, multiplying the appropriate texture colours in
 	vec3 ambient = AmbientColour * Ka * diffuseTexColour;
-	vec3 diffuse = LightColour * Kd * lambertTerm * diffuseTexColour;
-	vec3 specular = LightColour * Ks * specularTerm * specularTexColour;
+	vec3 diffuse = diffuseTotal * Kd * diffuseTexColour;
+	vec3 specular = specularTotal * Ks * specularTexColour;
 
 	// Debug purposes
 	//ambient = vec3(0.0f, 0.0f, 0.0f);

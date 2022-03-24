@@ -32,6 +32,9 @@ bool Application3D::startup() {
 
 	// Initialise the main scene with a camera and some lights
 	m_mainScene = new Scene(new Camera(-90.0f, -40.0f, { 0, 10, 10 }), vec2(getWindowWidth(), getWindowHeight()), &m_light, m_ambientLight);
+	// Add two point lights to the main scene
+	m_mainScene->getPointLights().push_back(Light(vec3(5, 3, 0), vec3(1, 0, 0), 50));
+	m_mainScene->getPointLights().push_back(Light(vec3(-5, 3, 0), vec3(0, 1, 0), 50));
 
 	// Load the vertex and fragment shaders into the shader program
 	m_shaderProgram.loadShader(aie::eShaderStage::VERTEX, "./shaders/phong.vert");
