@@ -1,11 +1,11 @@
 #version 410
 
 in vec4 vPosition;
-out vec4 FragColour;
+in vec2 vTexCoord;
 
-uniform float Time;
+uniform sampler2D diffuseTexture;
 
 void main()
 {
-	FragColour = vec4(vPosition.z * sin(Time * 2f) + 0.3f, vPosition.x * sin(Time * 2f) + 0.3f, vPosition.y * sin(Time * 2f) + 0.3f, 1);
+	gl_FragColor = vec4(texture(diffuseTexture, vTexCoord).xyz, 1);
 }

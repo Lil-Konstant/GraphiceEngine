@@ -56,9 +56,8 @@ void main()
 	// Modify the lighting normal based on the high res normal transformed into worldspace
 	normal = TBN * normalTex;
 
-	// Calculate the diffuse total for all 4 affecting lights
+	// Calculate the diffuse and specular total starting with the main sunlight
 	vec3 diffuseTotal = diffuse(lightDirection, LightColour, normal);
-	// Calculate the sepcular total for all 4 affecting lights
 	vec3 viewingDisplacement = normalize(CameraPosition - vWorldPosition);
 	vec3 specularTotal = specular(lightDirection, LightColour, normal, viewingDisplacement);
 	
@@ -94,7 +93,6 @@ void main()
 	//specular = vec3(0.0f, 0.0f, 0.0f);
 	
 	// combine the each lighting type for the final fragment colour
-	
 	gl_FragColor = vec4(ambient + diffuse + specular, 1);
 	if (gl_FragColor == vec4(0, 0, 0, 1))
 	{

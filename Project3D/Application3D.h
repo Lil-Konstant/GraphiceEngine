@@ -6,6 +6,7 @@
 #include "Mesh.h"
 #include "OBJMesh.h"
 #include "ObjectInstance.h"
+#include "RenderTarget.h"
 
 using namespace glm;
 using namespace aie;
@@ -26,7 +27,11 @@ public:
 protected:
 
 	Scene* m_mainScene;
-	ShaderProgram m_shaderProgram;
+	
+	ShaderProgram m_phongShader;
+	ShaderProgram m_postShader;
+	RenderTarget m_renderTarget;
+
 	Light m_light;
 	vec3 m_ambientLight;
 
@@ -34,6 +39,8 @@ protected:
 	ObjectInstance* m_spearInstance;
 
 	Texture m_gridTexture;
-	Mesh m_quad;
+	//Mesh m_quad;
 	mat4 m_quadTransform;
+
+	Mesh m_fullscreenQuad;
 };

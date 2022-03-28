@@ -42,6 +42,9 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RenderTarget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Application3D.h">
@@ -71,6 +74,9 @@
     <ClInclude Include="Scene.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RenderTarget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\bin\shaders\simple.vert">
@@ -83,6 +89,12 @@
       <Filter>Shaders</Filter>
     </None>
     <None Include="..\bin\shaders\phong.frag">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\post.vert">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\bin\shaders\post.frag">
       <Filter>Shaders</Filter>
     </None>
   </ItemGroup>

@@ -26,6 +26,12 @@ bool Application3D::startup() {
 	// Initialise gizmo primitive counts
 	Gizmos::create(10000, 10000, 10000, 10000);
 
+	if (m_renderTarget.initialise(1, getWindowWidth(), getWindowHeight()) == false) 
+	{
+		printf("Render Target Error!\n");
+		return false;
+	}
+
 	// Initialise the scene lights
 	m_light.colour = { 1.0f, 1.0f, 1.0f };
 	m_ambientLight = { 0.5f, 0.5f, 0.5f };
@@ -36,13 +42,19 @@ bool Application3D::startup() {
 	m_mainScene->getPointLights().push_back(Light(vec3(5, 3, 0), vec3(1, 0, 0), 50));
 	m_mainScene->getPointLights().push_back(Light(vec3(-5, 3, 0), vec3(0, 1, 0), 50));
 
-	// Load the vertex and fragment shaders into the shader program
-	m_shaderProgram.loadShader(aie::eShaderStage::VERTEX, "./shaders/phong.vert");
-	m_shaderProgram.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phong.frag");
+	// Load the vertex and fragment shaders into the simple and phong shader programs
+	m_phongShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/phong.vert");
+	m_phongShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phong.frag");
+	m_postShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/post.vert");
+	m_postShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/post.frag");
 	// Attempt to link the shaders into a program, return if failed
-	if (m_shaderProgram.link() == false)
+	if (m_phongShader.link() == false)
 	{
-		printf("Shader Error: %s\n", m_shaderProgram.getLastError());
+		printf("Shader Error: %s\n", m_phongShader.getLastError());
+		return false;
+	}if (m_postShader.link() == false)
+	{
+		printf("Shader Error: %s\n", m_postShader.getLastError());
 		return false;
 	}
 
@@ -54,7 +66,7 @@ bool Application3D::startup() {
 	}
 	for (int i = -5; i <= 5; i++)
 	{
-		m_mainScene->AddObjectInstance(new ObjectInstance(&m_shaderProgram, &m_spearMesh, vec3(i, 0, i), vec3(0, 0, 0)));
+		m_mainScene->AddObjectInstance(new ObjectInstance(&m_phongShader, &m_spearMesh, vec3(i, 0, i), vec3(0, 0, 0)));
 	}
 	
 	
@@ -70,7 +82,8 @@ bool Application3D::startup() {
 		0, 0, 15, 0,
 		0, 0, 0, 1 };
 
-	m_quad.initialiseQuad();
+	//m_quad.initialiseQuad();
+	m_fullscreenQuad.initialiseFullscreenQuad();
 
 	return true;
 }
@@ -116,23 +129,25 @@ void Application3D::update(float deltaTime)
 
 void Application3D::draw() {
 
+	// Bind the render target for use
+	m_renderTarget.bind();
 	// wipe the screen to the background colour
 	clearScreen();
-
 	// draw all object instances in the scene
 	m_mainScene->draw();
-	
-	m_shaderProgram.bindUniform("Ka", vec3(1, 1, 1));
-	m_shaderProgram.bindUniform("Kd", vec3(1, 1, 1));
-	m_shaderProgram.bindUniform("Ks", vec3(1, 1, 1));
-	m_shaderProgram.bindUniform("ModelTransform", m_quadTransform);
-	// bind the quad texture for quad drawing
-	m_shaderProgram.bindUniform("diffuseTexture", 0);
-	m_gridTexture.bind(0);
-	m_quad.draw();
-
 	// draw 3D gizmos
-	Gizmos::draw(m_mainScene->getCamera()->getProjectionMatrix(getWindowWidth(), getWindowHeight()) * m_mainScene->getCamera()->getViewMatrix());
+	//Gizmos::draw(m_mainScene->getCamera()->getProjectionMatrix(getWindowWidth(), getWindowHeight()) * m_mainScene->getCamera()->getViewMatrix());
+	// Unbind the render target and clear the backbuffer
+	m_renderTarget.unbind();
+	clearScreen();
+
+	m_postShader.bind();
+
+	m_postShader.bindUniform("renderTexture", 0);
+	m_renderTarget.getTarget(0).bind(0);
+
+	m_fullscreenQuad.draw();
+	m_mainScene->draw();
 }
 
 void Application3D::createUnitCube()

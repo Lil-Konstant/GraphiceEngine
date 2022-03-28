@@ -117,6 +117,42 @@ void Mesh::initialiseQuad()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void Mesh::initialiseFullscreenQuad()
+{
+	// Make sure the mesh is not already initialised
+	assert(vao == 0);
+
+	// Generate the buffers
+	glGenBuffers(1, &vbo);
+	glGenVertexArrays(1, &vao);
+
+	// Bind the buffers to be ready for editing/drawing
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+	// Define 6 vertices and for 2 triangles (not using ibo), and set their corresponding UV coordinates
+	float vertices[] = {
+		-1,1, // left top 
+		-1,-1, // left bottom 
+		1,1, // right top 
+		-1,-1, // left bottom 
+		1,-1, // right bottom 
+		1, 1 // right top
+	};
+	triCount = 2;
+
+	// Fill the vbo with the vertices data
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6, vertices, GL_STATIC_DRAW);
+
+	// Enable the first element as position
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 8, 0);
+
+	// Unbind the buffers as we are done assigning to them
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+}
+
 void Mesh::draw()
 {
 	glBindVertexArray(vao);
