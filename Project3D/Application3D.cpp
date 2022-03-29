@@ -61,7 +61,7 @@ bool Application3D::startup() {
 	// Attempt to load the spear obj in and add an instance of it to the scene
 	if (m_spearMesh.load("./soulspear/soulspear.obj", true, true) == false)
 	{
-		printf("Bunny Mesh Error!\n");
+		printf("Spear Mesh Error!\n");
 		return false;
 	}
 	for (int i = -5; i <= 5; i++)
@@ -118,6 +118,7 @@ void Application3D::update(float deltaTime)
 	ImGui::Begin("Light Settings");
 	ImGui::DragFloat3("Sunlight Direction", &m_light.direction[0], 0.1f, -1.0f, 1.0f);
 	ImGui::DragFloat3("Sunlight Colour", &m_light.colour[0], 0.1f, 0.0f, 2.0f);
+	ImGui::Combo("Post Processor Effect", &m_selectedPostProcessor, m_postProcessors, 3, -1);
 	ImGui::End();
 
 	// quit if we press escape
@@ -142,10 +143,9 @@ void Application3D::draw() {
 	clearScreen();
 
 	m_postShader.bind();
-
+	m_postShader.bindUniform("selectedPostProcessor", m_selectedPostProcessor);
 	m_postShader.bindUniform("renderTexture", 0);
 	m_renderTarget.getTarget(0).bind(0);
-
 	m_fullscreenQuad.draw();
 	m_mainScene->draw();
 }

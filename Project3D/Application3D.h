@@ -43,4 +43,8 @@ protected:
 	mat4 m_quadTransform;
 
 	Mesh m_fullscreenQuad;
+	
+	const char* m_postProcessors[3] = { "Default", "Box Blur",
+							 "Cellshade"};
+	int m_selectedPostProcessor = 0;
 };
