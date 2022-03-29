@@ -17,7 +17,7 @@ class ObjectInstance
 public:
 
 	ObjectInstance(aie::ShaderProgram* shaderProgram, aie::OBJMesh* mesh, glm::mat4 transform = glm::mat4(1)) : m_shaderProgram(shaderProgram), m_mesh(mesh), m_transform(transform) {}
-	ObjectInstance(aie::ShaderProgram* shaderProgram, aie::OBJMesh* mesh, glm::vec3 position, glm::vec3 eulerAngles, glm::vec3 scale = glm::vec3(1, 1, 1)) : m_shaderProgram(shaderProgram), m_mesh(mesh), m_transform(makeTransform(position, eulerAngles, scale)) {}
+	ObjectInstance(aie::ShaderProgram* shaderProgram, aie::OBJMesh* mesh, glm::vec3 position, glm::vec3 eulerRotation = glm::vec3(0, 0, 0), glm::vec3 scale = glm::vec3(1, 1, 1)) : m_shaderProgram(shaderProgram), m_mesh(mesh), m_transform(makeTransform(position, eulerRotation, scale)) {}
 	~ObjectInstance() {}
 
 	void draw(Scene* scene);

@@ -28,6 +28,7 @@ protected:
 
 	Scene* m_mainScene;
 	
+	ShaderProgram m_simpleShader;
 	ShaderProgram m_phongShader;
 	ShaderProgram m_postShader;
 	RenderTarget m_renderTarget;
@@ -35,11 +36,12 @@ protected:
 	Light m_light;
 	vec3 m_ambientLight;
 
+	OBJMesh m_bunnyMesh;
 	OBJMesh m_spearMesh;
-	ObjectInstance* m_spearInstance;
+	//ObjectInstance* m_spearInstance;
 
 	Texture m_gridTexture;
-	//Mesh m_quad;
+	Mesh m_quad;
 	mat4 m_quadTransform;
 
 	Mesh m_fullscreenQuad;

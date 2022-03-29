@@ -142,7 +142,7 @@ void Mesh::initialiseFullscreenQuad()
 	triCount = 2;
 
 	// Fill the vbo with the vertices data
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 6, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 12, vertices, GL_STATIC_DRAW);
 
 	// Enable the first element as position
 	glEnableVertexAttribArray(0);

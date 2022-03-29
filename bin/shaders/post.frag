@@ -42,6 +42,16 @@ vec4 Distort(vec2 texCoord)
 	return texture(renderTexture, newCoord); 
 }
 
+vec4 Invert(vec2 texCoord)
+{
+	vec4 colour = texture(renderTexture, texCoord);
+	colour = 1 - colour;
+	colour.a = 1.0f;
+	return colour;
+}
+
+
+
 vec4 SobelEdge(vec2 texCoord, vec2 texelSize)
 {
 	vec4 colourX = texture(renderTexture, texCoord + texelSize * vec2(-1.0f, 1.0f)) * -1.0f;
@@ -85,4 +95,6 @@ void main()
 			gl_FragColor = combine;
 			break;
 	}
+
+	//gl_FragColor = Invert(texCoord);
 }

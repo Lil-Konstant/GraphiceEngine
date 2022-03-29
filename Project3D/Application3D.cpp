@@ -43,21 +43,34 @@ bool Application3D::startup() {
 	m_mainScene->getPointLights().push_back(Light(vec3(-5, 3, 0), vec3(0, 1, 0), 50));
 
 	// Load the vertex and fragment shaders into the simple and phong shader programs
+	m_simpleShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/simple.vert");
+	m_simpleShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/simple.frag");
 	m_phongShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/phong.vert");
 	m_phongShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phong.frag");
 	m_postShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/post.vert");
 	m_postShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/post.frag");
 	// Attempt to link the shaders into a program, return if failed
-	if (m_phongShader.link() == false)
+	if (m_simpleShader.link() == false)
 	{
-		printf("Shader Error: %s\n", m_phongShader.getLastError());
+		printf("Simple Shader Error: %s\n", m_simpleShader.getLastError());
+		return false;
+	}if (m_phongShader.link() == false)
+	{
+		printf("Phong Shader Error: %s\n", m_phongShader.getLastError());
 		return false;
 	}if (m_postShader.link() == false)
 	{
-		printf("Shader Error: %s\n", m_postShader.getLastError());
+		printf("Post Shader Error: %s\n", m_postShader.getLastError());
 		return false;
 	}
 
+	// Attempt to load the bunny obj in and add an instance of it to the scene
+	if (m_bunnyMesh.load("./stanford/bunny.obj", true, true) == false)
+	{
+		printf("Bunny Mesh Error!\n");
+		return false;
+	}
+	m_mainScene->AddObjectInstance(new ObjectInstance(&m_simpleShader, &m_bunnyMesh, vec3(2), vec3(0), vec3(0.2f)));
 	// Attempt to load the spear obj in and add an instance of it to the scene
 	if (m_spearMesh.load("./soulspear/soulspear.obj", true, true) == false)
 	{
@@ -76,13 +89,7 @@ bool Application3D::startup() {
 		return false;
 	}
 
-	m_quadTransform = {
-		15, 0, 0, 0,
-		0, 15, 0, 0,
-		0, 0, 15, 0,
-		0, 0, 0, 1 };
-
-	//m_quad.initialiseQuad();
+	m_quad.initialiseQuad();
 	m_fullscreenQuad.initialiseFullscreenQuad();
 
 	return true;

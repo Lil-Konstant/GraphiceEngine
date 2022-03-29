@@ -87,15 +87,18 @@ void main()
 	vec3 diffuse = diffuseTotal * Kd * diffuseTexColour;
 	vec3 specular = specularTotal * Ks * specularTexColour;
 
-	// Debug purposes
-	//ambient = vec3(0.0f, 0.0f, 0.0f);
-	//diffuse = vec3(0.0f, 0.0f, 0.0f);
-	//specular = vec3(0.0f, 0.0f, 0.0f);
 	
+
 	// combine the each lighting type for the final fragment colour
 	gl_FragColor = vec4(ambient + diffuse + specular, 1);
-	if (gl_FragColor == vec4(0, 0, 0, 1))
+
+	if (diffuseTexColour == vec3(0, 0, 0) || specularTexColour == vec3(0, 0, 0))
 	{
+		ambient = AmbientColour * Ka;
+		diffuse = diffuseTotal * Kd;
+		specular = specularTotal * Ks;
 		gl_FragColor = vec4(ambient + diffuse + specular, 1);
+		gl_FragColor = vec4(1,1,0,1);
+		return;
 	}
 }
