@@ -34,6 +34,7 @@ public:
 	int getNumLights() { return m_pointLights.size(); }
 	vec3* getPointLightPositions() { return &m_pointLightPositions[0]; }
 	vec3* getPointLightColours() { return &m_pointLightColours[0]; }
+	bool* getDrawPointLights() { return &m_drawPointLights; }
 	// Setters
 	void setWindowSize(vec2 windowSize) { m_windowSize = windowSize; }
 
@@ -49,4 +50,5 @@ protected:
 	std::vector<Light> m_pointLights;
 	vec3 m_pointLightPositions[MAX_LIGHTS];
 	vec3 m_pointLightColours[MAX_LIGHTS];
+	bool m_drawPointLights = true;
 };

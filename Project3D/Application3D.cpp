@@ -34,6 +34,7 @@ bool Application3D::startup() {
 
 	// Initialise the scene lights
 	m_light.colour = { 1.0f, 1.0f, 1.0f };
+	m_light.direction = { 0.707f, -0.707f, -0.707f };
 	m_ambientLight = { 0.5f, 0.5f, 0.5f };
 
 	// Initialise the main scene with a camera and some lights
@@ -70,7 +71,7 @@ bool Application3D::startup() {
 		printf("Bunny Mesh Error!\n");
 		return false;
 	}
-	m_mainScene->AddObjectInstance(new ObjectInstance(&m_simpleShader, &m_bunnyMesh, vec3(2), vec3(0), vec3(0.2f)));
+	m_mainScene->AddObjectInstance(new ObjectInstance(&m_simpleShader, &m_bunnyMesh, vec3(10, 0, 10), vec3(0), vec3(0.2f)));
 	// Attempt to load the spear obj in and add an instance of it to the scene
 	if (m_spearMesh.load("./soulspear/soulspear.obj", true, true) == false)
 	{
@@ -122,10 +123,20 @@ void Application3D::update(float deltaTime)
 						i == 10 ? white : black);
 	}
 
-	ImGui::Begin("Light Settings");
+	ImGui::Begin("Main Graphics Settings");
+	ImGui::Combo("Post Processor Effect", &m_selectedPostProcessor, m_postProcessors, m_postProcessorsCount, -1);
 	ImGui::DragFloat3("Sunlight Direction", &m_light.direction[0], 0.1f, -1.0f, 1.0f);
 	ImGui::DragFloat3("Sunlight Colour", &m_light.colour[0], 0.1f, 0.0f, 2.0f);
-	ImGui::Combo("Post Processor Effect", &m_selectedPostProcessor, m_postProcessors, 3, -1);
+	ImGui::End();
+	
+	ImGui::Begin("Point Light Settings");
+	ImGui::Checkbox("Visible Point Light Gizmos?", m_mainScene->getDrawPointLights());
+	ImGui::Combo("", &m_selectedPointLight, m_pointLights, m_pointLightCount, -1);
+
+	std::vector<Light>& pointLights = m_mainScene->getPointLights();
+	ImGui::DragFloat3("Position", &pointLights[m_selectedPointLight].direction[0], 0.1f);
+	ImGui::DragFloat3("Colour", &pointLights[m_selectedPointLight].colour[0], 0.1f, 0.0f, 2.0f);
+
 	ImGui::End();
 
 	// quit if we press escape
@@ -143,18 +154,20 @@ void Application3D::draw() {
 	clearScreen();
 	// draw all object instances in the scene
 	m_mainScene->draw();
-	// draw 3D gizmos
-	//Gizmos::draw(m_mainScene->getCamera()->getProjectionMatrix(getWindowWidth(), getWindowHeight()) * m_mainScene->getCamera()->getViewMatrix());
+	// Draw the scene gizmos (the grid and the point lights if ticked to draw)
+	Gizmos::draw(m_mainScene->getCamera()->getProjectionMatrix(getWindowWidth(), getWindowHeight()) * m_mainScene->getCamera()->getViewMatrix());
 	// Unbind the render target and clear the backbuffer
 	m_renderTarget.unbind();
 	clearScreen();
 
 	m_postShader.bind();
+	m_postShader.bindUniform("Time", getTime());
 	m_postShader.bindUniform("selectedPostProcessor", m_selectedPostProcessor);
 	m_postShader.bindUniform("renderTexture", 0);
 	m_renderTarget.getTarget(0).bind(0);
+
 	m_fullscreenQuad.draw();
-	m_mainScene->draw();
+	
 }
 
 void Application3D::createUnitCube()

@@ -91,14 +91,4 @@ void main()
 
 	// combine the each lighting type for the final fragment colour
 	gl_FragColor = vec4(ambient + diffuse + specular, 1);
-
-	if (diffuseTexColour == vec3(0, 0, 0) || specularTexColour == vec3(0, 0, 0))
-	{
-		ambient = AmbientColour * Ka;
-		diffuse = diffuseTotal * Kd;
-		specular = specularTotal * Ks;
-		gl_FragColor = vec4(ambient + diffuse + specular, 1);
-		gl_FragColor = vec4(1,1,0,1);
-		return;
-	}
 }

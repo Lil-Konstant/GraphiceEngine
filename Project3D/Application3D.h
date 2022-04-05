@@ -36,9 +36,9 @@ protected:
 	Light m_light;
 	vec3 m_ambientLight;
 
+	// Model meshes
 	OBJMesh m_bunnyMesh;
 	OBJMesh m_spearMesh;
-	//ObjectInstance* m_spearInstance;
 
 	Texture m_gridTexture;
 	Mesh m_quad;
@@ -46,7 +46,11 @@ protected:
 
 	Mesh m_fullscreenQuad;
 	
-	const char* m_postProcessors[3] = { "Default", "Box Blur",
-							 "Cellshade"};
+	static const int m_postProcessorsCount = 6;
+	const char* m_postProcessors[m_postProcessorsCount] = { "Default", "Box Blur", "Distort", "Water Distort", "Invert", "Cellshade" };
 	int m_selectedPostProcessor = 0;
+
+	static const int m_pointLightCount = 2;
+	const char* m_pointLights[m_postProcessorsCount] = { "Point Light 1", "Point Light 2"};
+	int m_selectedPointLight = 0;
 };

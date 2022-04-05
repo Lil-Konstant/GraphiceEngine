@@ -37,7 +37,7 @@ void Scene::update(float deltaTime, float time)
 	m_mainCamera->update(deltaTime);
 
 	// rotate the sunlight around the z axis
-	m_sunLight->direction = glm::normalize(vec3(glm::cos(time), 0, glm::sin(time)));
+	//m_sunLight->direction = glm::normalize(vec3(glm::cos(time), 0, glm::sin(time)));
 
 	for (auto objectInstance : m_objectInstances)
 	{
@@ -50,11 +50,19 @@ void Scene::draw()
 	for (int i = 0; i < MAX_LIGHTS && i < m_pointLights.size(); i++)
 	{
 		m_pointLightPositions[i] = m_pointLights[i].direction;
-		m_pointLightColours[i] = m_pointLights[i].colour;
+		m_pointLightColours[i] = m_pointLights[i].colour * m_pointLights[i].intensity;
 	}
 
 	for (auto objectInstance : m_objectInstances)
 	{
 		objectInstance->draw(this);
+	}
+
+	if (m_drawPointLights)
+	{
+		for (auto pointLight : m_pointLights)
+		{
+			pointLight.drawGizmo();
+		}
 	}
 }
