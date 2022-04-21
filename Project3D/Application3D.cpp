@@ -71,7 +71,7 @@ bool Application3D::startup() {
 		printf("Bunny Mesh Error!\n");
 		return false;
 	}
-	m_mainScene->AddObjectInstance(new ObjectInstance(&m_simpleShader, &m_bunnyMesh, vec3(10, 0, 10), vec3(0), vec3(0.2f)));
+	m_mainScene->AddObjectInstance(new ObjectInstance(&m_simpleShader, &m_bunnyMesh, vec3(8, 0, 8), vec3(0), vec3(0.2f)));
 	// Attempt to load the spear obj in and add an instance of it to the scene
 	if (m_spearMesh.load("./soulspear/soulspear.obj", true, true) == false)
 	{
@@ -104,6 +104,7 @@ void Application3D::shutdown() {
 
 void Application3D::update(float deltaTime) 
 {
+	// Trigger the update sequence on the main scene
 	m_mainScene->update(deltaTime, getTime());
 	// Update the scene's window size incase it has changed
 	m_mainScene->setWindowSize(vec2(getWindowWidth(), getWindowHeight()));
@@ -111,7 +112,7 @@ void Application3D::update(float deltaTime)
 	// wipe the gizmos clean for this frame
 	Gizmos::clear();
 
-	// draw a simple grid with gizmos
+	// Draw a simple grid with gizmos
 	vec4 white(1);
 	vec4 black(0, 0, 0, 1);
 	for (int i = 0; i < 21; ++i) {
@@ -123,25 +124,31 @@ void Application3D::update(float deltaTime)
 						i == 10 ? white : black);
 	}
 
+	// Create a GUI panel for the controls information
+	ImGui::Begin("Controls");
+	ImGui::Text("- Use WASD to move around the scene.");
+	ImGui::Text("- Use Q and E to move up and down respectively.");
+	ImGui::Text("- Rotate the camera by moving the mouse while holding right click.");
+	ImGui::End();
+
+	// Create a GUI panel for selecting the post processing effect to use, and the direction and colour of the sunlight in the scene
 	ImGui::Begin("Main Graphics Settings");
 	ImGui::Combo("Post Processor Effect", &m_selectedPostProcessor, m_postProcessors, m_postProcessorsCount, -1);
 	ImGui::DragFloat3("Sunlight Direction", &m_light.direction[0], 0.1f, -1.0f, 1.0f);
 	ImGui::DragFloat3("Sunlight Colour", &m_light.colour[0], 0.1f, 0.0f, 2.0f);
 	ImGui::End();
 	
+	// Create a GUI panel for the point light settings (pass the selected point light as reference for altering it's position and colour)
 	ImGui::Begin("Point Light Settings");
 	ImGui::Checkbox("Visible Point Light Gizmos?", m_mainScene->getDrawPointLights());
 	ImGui::Combo("", &m_selectedPointLight, m_pointLights, m_pointLightCount, -1);
-
 	std::vector<Light>& pointLights = m_mainScene->getPointLights();
 	ImGui::DragFloat3("Position", &pointLights[m_selectedPointLight].direction[0], 0.1f);
 	ImGui::DragFloat3("Colour", &pointLights[m_selectedPointLight].colour[0], 0.1f, 0.0f, 2.0f);
-
 	ImGui::End();
 
-	// quit if we press escape
+	// Quit the application if the user has pressed escape this frame
 	aie::Input* input = aie::Input::getInstance();
-
 	if (input->isKeyDown(aie::INPUT_KEY_ESCAPE))
 		quit();
 }
@@ -167,7 +174,6 @@ void Application3D::draw() {
 	m_renderTarget.getTarget(0).bind(0);
 
 	m_fullscreenQuad.draw();
-	
 }
 
 void Application3D::createUnitCube()

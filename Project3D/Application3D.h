@@ -51,6 +51,6 @@ protected:
 	int m_selectedPostProcessor = 0;
 
 	static const int m_pointLightCount = 2;
-	const char* m_pointLights[m_postProcessorsCount] = { "Point Light 1", "Point Light 2"};
+	const char* m_pointLights[m_pointLightCount] = { "Point Light 1", "Point Light 2"};
 	int m_selectedPointLight = 0;
 };
