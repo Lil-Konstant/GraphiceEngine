@@ -318,10 +318,6 @@ void OBJMesh::calculateTangents(std::vector<Vertex>& vertices, const std::vector
 
 		// Calculate handedness (direction of bitangent)
 		vertices[a].tangent.w = (glm::dot(glm::cross(glm::vec3(n), glm::vec3(t)), glm::vec3(tan2[a])) < 0.0F) ? 1.0F : -1.0F;
-
-		// calculate bitangent (ignoring for our Vertex, here just for reference)
-		//vertices[a].bitangent = glm::vec4(glm::cross(glm::vec3(vertices[a].normal), glm::vec3(vertices[a].tangent)) * vertices[a].tangent.w, 0);
-		//vertices[a].tangent.w = 0;
 	}
 
 	delete[] tan1;

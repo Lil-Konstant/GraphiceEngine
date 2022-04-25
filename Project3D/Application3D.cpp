@@ -20,6 +20,10 @@ Application3D::~Application3D() {
 
 }
 
+/// <summary>
+/// 
+/// </summary>
+/// <returns></returns>
 bool Application3D::startup() {
 	
 	setBackgroundColour(0.25f, 0.25f, 0.25f);
@@ -96,12 +100,20 @@ bool Application3D::startup() {
 	return true;
 }
 
+/// <summary>
+/// shutdown() is called when the user presses escape during the update() sequence, and simply calls
+/// destroy on the Gizmo class and then deletes the mainScene member.
+/// </summary>
 void Application3D::shutdown() {
 
 	Gizmos::destroy();
 	delete m_mainScene;
 }
 
+/// <summary>
+/// 
+/// </summary>
+/// <param name="deltaTime"></param>
 void Application3D::update(float deltaTime) 
 {
 	// Trigger the update sequence on the main scene
@@ -153,6 +165,14 @@ void Application3D::update(float deltaTime)
 		quit();
 }
 
+/// <summary>
+/// draw() is used called by the Application base class' update loop. The function first binds the member
+/// m_renderTarget for use so whatever is drawn gets drawn to the frame buffer, and then calls draw on 
+/// the member scene of the application, which iterates through and draws all ObjectInstance's managed
+/// by the scene. The function will then bind the post processing shader for use (as well as it's uniforms),
+/// and then finally call draw on the m_fullscreenQuad member, which effectively redraws the screen using the
+/// initial scene drawing as a texture, allowing for post processing effects. 
+/// </summary>
 void Application3D::draw() {
 
 	// Bind the render target for use
@@ -167,36 +187,13 @@ void Application3D::draw() {
 	m_renderTarget.unbind();
 	clearScreen();
 
+	// Now we bind the post processing shader and uniforms to redraw the scene for post processing
 	m_postShader.bind();
 	m_postShader.bindUniform("Time", getTime());
-	m_postShader.bindUniform("selectedPostProcessor", m_selectedPostProcessor);
+	m_postShader.bindUniform("selectedPostProcessor", m_selectedPostProcessor); // Dictates which processing function is called in post.frag
 	m_postShader.bindUniform("renderTexture", 0);
-	m_renderTarget.getTarget(0).bind(0);
+	m_renderTarget.getTarget(0).bind(0); // Bind the renderTarget to the 0th texture slot for the uniform
 
+	// Draw the fullscreen quad now that we have the initial scene drawing in the renderTexture uniform
 	m_fullscreenQuad.draw();
-}
-
-void Application3D::createUnitCube()
-{
-	Mesh::Vertex vertices[8];
-	vertices[0].position = { -0.5f, -0.5f, 0.5f, 1 };
-	vertices[1].position = { 0.5f, -0.5f, 0.5f, 1 };
-	vertices[2].position = { -0.5f, -0.5f, -0.5f, 1 };
-	vertices[3].position = { 0.5f, -0.5f, -0.5f, 1 };
-	vertices[4].position = { -0.5f, 0.5f, 0.5f, 1 };
-	vertices[5].position = { 0.5f, 0.5f, 0.5f, 1 };
-	vertices[6].position = { -0.5f, 0.5f, -0.5f, 1 };
-	vertices[7].position = { 0.5f, 0.5f, -0.5f, 1 };
-
-	unsigned int indices[36] = { 2, 1, 0, 3, 1, 2, 4, 5, 6, 5, 7, 6, 2, 6, 3, 6, 7, 3, 4, 6, 0, 6, 2, 0, 5, 4, 0, 5, 0, 1, 7, 5, 1, 1, 3, 7 };
-
-	// Initialise a test quad with custom vertices
-	//m_unitCube.initialise(8, vertices, 36, indices);
-
-	// Make the quad 1 units wide
-	/*m_unitCubeTransform = {
-		5, 0, 0, 0,
-		0, 5, 0, 0,
-		0, 0, 5, 0,
-		0, 0, 0, 1 };*/
 }
