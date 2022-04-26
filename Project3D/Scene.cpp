@@ -3,11 +3,21 @@
 #include "Camera.h"
 #include "Light.h"
 
-Scene::Scene(Camera* camera, vec2 windowSize, Light* light, vec3 ambientLight)
+/// <summary>
+/// Scene's only constructor simply takes it's inputs and with them 
+/// initialises the main camera to be used for drawing from, the size 
+/// of the application, the main directional light in the scene, as 
+/// well as the colour value of the ambient lighting of the scene.
+/// </summary>
+/// <param name="camera">Main camera for the scene, of which the perspective will be used to draw from.</param>
+/// <param name="windowSize">Width (x) and height (y) of the application window.</param>
+/// <param name="mainLight">Main directional light for the scene.</param>
+/// <param name="ambientLight">Background ambient lighting of the scene, as a colour value.</param>
+Scene::Scene(Camera* camera, vec2 windowSize, Light* mainLight, vec3 ambientLight)
 {
 	m_mainCamera = camera;
 	m_windowSize = windowSize;
-	m_sunLight = light;
+	m_sunLight = mainLight;
 	m_ambientLight = ambientLight;
 }
 

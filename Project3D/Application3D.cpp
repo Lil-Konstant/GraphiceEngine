@@ -21,40 +21,43 @@ Application3D::~Application3D() {
 }
 
 /// <summary>
-/// 
+/// startup() contains all of the scene initialisation logic for filling the scene with objects, loading their
+/// meshes, loading the member shaders, as well as populating the scene with a directional light and some 
+/// point lights.
 /// </summary>
-/// <returns></returns>
+/// <returns>True if successful, false if a mesh/shader fails loading or linking.</returns>
 bool Application3D::startup() {
 	
+	// Set the background colour to grey and initialise gizmo primitive counts
 	setBackgroundColour(0.25f, 0.25f, 0.25f);
-	// Initialise gizmo primitive counts
 	Gizmos::create(10000, 10000, 10000, 10000);
 
+	// Attempt to initialise the render target member, exit early if failed
 	if (m_renderTarget.initialise(1, getWindowWidth(), getWindowHeight()) == false) 
 	{
 		printf("Render Target Error!\n");
 		return false;
 	}
 
-	// Initialise the scene lights
+	// Initialise the main directional light and ambient scene lighting
 	m_light.colour = { 1.0f, 1.0f, 1.0f };
 	m_light.direction = { 0.707f, -0.707f, -0.707f };
 	m_ambientLight = { 0.5f, 0.5f, 0.5f };
 
-	// Initialise the main scene with a camera and some lights
+	// Initialise the main scene with a camera above the scene looking down at it, and pass the main directional light and ambient light as references
 	m_mainScene = new Scene(new Camera(-90.0f, -40.0f, { 0, 10, 10 }), vec2(getWindowWidth(), getWindowHeight()), &m_light, m_ambientLight);
 	// Add two point lights to the main scene
 	m_mainScene->getPointLights().push_back(Light(vec3(5, 3, 0), vec3(1, 0, 0), 50));
 	m_mainScene->getPointLights().push_back(Light(vec3(-5, 3, 0), vec3(0, 1, 0), 50));
 
-	// Load the vertex and fragment shaders into the simple and phong shader programs
+	// Load the vertex and fragment shaders into the simple, phong, and post shader programs
 	m_simpleShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/simple.vert");
 	m_simpleShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/simple.frag");
 	m_phongShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/phong.vert");
 	m_phongShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/phong.frag");
 	m_postShader.loadShader(aie::eShaderStage::VERTEX, "./shaders/post.vert");
 	m_postShader.loadShader(aie::eShaderStage::FRAGMENT, "./shaders/post.frag");
-	// Attempt to link the shaders into a program, return if failed
+	// Attempt to link each shader into it's own program, exit early if failed
 	if (m_simpleShader.link() == false)
 	{
 		printf("Simple Shader Error: %s\n", m_simpleShader.getLastError());
@@ -76,7 +79,8 @@ bool Application3D::startup() {
 		return false;
 	}
 	m_mainScene->AddObjectInstance(new ObjectInstance(&m_simpleShader, &m_bunnyMesh, vec3(8, 0, 8), vec3(0), vec3(0.2f)));
-	// Attempt to load the spear obj in and add an instance of it to the scene
+	
+	// Attempt to load the spear obj in and add 11 instances of it to the scene along a diagonal line
 	if (m_spearMesh.load("./soulspear/soulspear.obj", true, true) == false)
 	{
 		printf("Spear Mesh Error!\n");
@@ -87,14 +91,7 @@ bool Application3D::startup() {
 		m_mainScene->AddObjectInstance(new ObjectInstance(&m_phongShader, &m_spearMesh, vec3(i, 0, i), vec3(0, 0, 0)));
 	}
 	
-	
-	if (m_gridTexture.load("./textures/numbered_grid.tga") == false)
-	{
-		printf("Couldn't load grid texture!\n");
-		return false;
-	}
-
-	m_quad.initialiseQuad();
+	// Initialise the fullscreen quad for post processing
 	m_fullscreenQuad.initialiseFullscreenQuad();
 
 	return true;
@@ -111,9 +108,14 @@ void Application3D::shutdown() {
 }
 
 /// <summary>
-/// 
+/// update() is called by the Application base class' update loop. The function first calls
+/// update on the member scene, which essentially just checks for any user input in updating the
+/// camera position, and will then use the AIE::Gizmos class to draw a flat 10x10 cartesian grid 
+/// across the y = 0 plane. The function then makes use of the ImGui library to display all of the
+/// UI required for the scene (controls, as well as interactable post processor and light settings).
+/// Finally, update() checks for any user input attempting to close the application, and will call
+/// Application::quit() if found.
 /// </summary>
-/// <param name="deltaTime"></param>
 void Application3D::update(float deltaTime) 
 {
 	// Trigger the update sequence on the main scene
@@ -139,8 +141,9 @@ void Application3D::update(float deltaTime)
 	// Create a GUI panel for the controls information
 	ImGui::Begin("Controls");
 	ImGui::Text("- Use WASD to move around the scene.");
-	ImGui::Text("- Use Q and E to move up and down respectively.");
+	ImGui::Text("- Use Q and E to move down and up respectively.");
 	ImGui::Text("- Rotate the camera by moving the mouse while holding right click.");
+	ImGui::Text("- Click and drag horizontally on any of the number boxes in the settings below to interact with them.");
 	ImGui::End();
 
 	// Create a GUI panel for selecting the post processing effect to use, and the direction and colour of the sunlight in the scene
@@ -166,7 +169,7 @@ void Application3D::update(float deltaTime)
 }
 
 /// <summary>
-/// draw() is used called by the Application base class' update loop. The function first binds the member
+/// draw() is called by the Application base class' update loop. The function first binds the member
 /// m_renderTarget for use so whatever is drawn gets drawn to the frame buffer, and then calls draw on 
 /// the member scene of the application, which iterates through and draws all ObjectInstance's managed
 /// by the scene. The function will then bind the post processing shader for use (as well as it's uniforms),

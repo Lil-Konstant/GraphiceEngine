@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Input.h"
 
 /// <summary>
 /// update() is a standard update function that gets called by the scene maintaining this camera every
